@@ -34,13 +34,13 @@ def fetch_plan(user_input: str):
     """Fetch AI plan from backend API and return (result, error)."""
     try:
         response = requests.post(
-            "http://127.0.0.1:8000/plan",
+            f"{API_URL}/plan",
             json={"text": user_input}
         )
         response.raise_for_status()
         return response.json(), None
     except requests.exceptions.ConnectionError:
-        return None, "Cannot connect to backend. Start the API at http://127.0.0.1:8000."
+        return None, f"Cannot connect to backend. Is the API running at {API_URL}?"
     except requests.exceptions.RequestException as e:
         return None, f"API Error: {str(e)}"
     except Exception as e:
