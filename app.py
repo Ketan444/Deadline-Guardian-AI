@@ -1,6 +1,7 @@
 # =====================
 # IMPORTS
 # =====================
+import os
 import streamlit as st
 import requests
 import pandas as pd
@@ -10,6 +11,20 @@ from services.pdf_service import generate_pdf
 from services.calendar_service import create_calendar
 
 from components.chat_assistant import guardian_chat
+
+def _get_api_url():
+    # Streamlit Cloud secrets live in st.secrets, not os.environ -- check
+    # both so this works the same locally (.env / os.environ) and on
+    # Streamlit Cloud (Secrets panel).
+    try:
+        if "API_URL" in st.secrets:
+            return st.secrets["API_URL"]
+    except Exception:
+        pass
+    return os.environ.get("API_URL", "http://127.0.0.1:8000")
+
+
+API_URL = _get_api_url()
 
 # =====================
 # PAGE CONFIG
@@ -30,19 +45,21 @@ def configure_page():
 # =====================
 # API FUNCTIONS
 # =====================
-def _get_api_url():
-    # Streamlit Cloud secrets live in st.secrets, not os.environ -- check
-    # both so this works the same locally (.env / os.environ) and on
-    # Streamlit Cloud (Secrets panel).
+def fetch_plan(user_input: str):
+    """Fetch AI plan from backend API and return (result, error)."""
     try:
-        if "API_URL" in st.secrets:
-            return st.secrets["API_URL"]
-    except Exception:
-        pass
-    return os.environ.get("API_URL", "http://127.0.0.1:8000")
-
-
-API_URL = _get_api_url()
+        response = requests.post(
+            f"{API_URL}/plan",
+            json={"text": user_input}
+        )
+        response.raise_for_status()
+        return response.json(), None
+    except requests.exceptions.ConnectionError:
+        return None, f"Cannot connect to backend. Is the API running at {API_URL}?"
+    except requests.exceptions.RequestException as e:
+        return None, f"API Error: {str(e)}"
+    except Exception as e:
+        return None, f"Unexpected error: {str(e)}"
 
 
 # =====================
@@ -778,4 +795,3 @@ Project Demo Monday
             
 if __name__ == "__main__":
         main()
-        
