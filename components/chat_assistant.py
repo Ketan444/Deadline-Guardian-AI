@@ -1,5 +1,18 @@
+import os
 import streamlit as st
 import requests
+
+
+def _get_api_url():
+    try:
+        if "API_URL" in st.secrets:
+            return st.secrets["API_URL"]
+    except Exception:
+        pass
+    return os.environ.get("API_URL", "http://127.0.0.1:8000")
+
+
+API_URL = _get_api_url()
 
 
 def guardian_chat():
@@ -21,7 +34,7 @@ def guardian_chat():
         try:
 
             response = requests.post(
-                "http://127.0.0.1:8000/chat",
+                f"{API_URL}/chat",
                 json={
                     "question": question
                 }
