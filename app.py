@@ -30,17 +30,19 @@ def configure_page():
 # =====================
 # API FUNCTIONS
 # =====================
-def fetch_plan(user_input: str):
-    """Fetch AI plan from backend API and return (result, error)."""
+def _get_api_url():
+    # Streamlit Cloud secrets live in st.secrets, not os.environ -- check
+    # both so this works the same locally (.env / os.environ) and on
+    # Streamlit Cloud (Secrets panel).
     try:
-        response = requests.post(
-            f"{API_URL}/plan",
-            json={"text": user_input}
-        )
-        response.raise_for_status()
-        return response.json(), None
-    except requests.exceptions.ConnectionError:
-        return None, f"Cannot connect to backend. Is the API running at {API_URL}?"
+        if "API_URL" in st.secrets:
+            return st.secrets["API_URL"]
+    except Exception:
+        pass
+    return os.environ.get("API_URL", "http://127.0.0.1:8000")
+
+
+API_URL = _get_api_url()
 
 
 # =====================
