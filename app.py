@@ -41,10 +41,6 @@ def fetch_plan(user_input: str):
         return response.json(), None
     except requests.exceptions.ConnectionError:
         return None, f"Cannot connect to backend. Is the API running at {API_URL}?"
-    except requests.exceptions.RequestException as e:
-        return None, f"API Error: {str(e)}"
-    except Exception as e:
-        return None, f"Unexpected error: {str(e)}"
 
 
 # =====================
